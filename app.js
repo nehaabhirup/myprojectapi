@@ -33,6 +33,22 @@ app.get('/category',(req,res)=>{
     })
 })
 
+//product wrt id
+app.get('/product/',(req,res) => {
+    let query = {};
+    let categoryId =  Number(req.query.category_id)
+    let productId =  Number(req.query.product_id)
+    if(categoryId){
+        query = {category_id:categoryId}
+    }else if(productId){
+        query = {product_id:productId}
+    }
+    db.collection('product').find(query).toArray((err,result) => {
+        if(err) throw err;
+        res.send(result)
+    })
+})
+
 //list
 app.get('/list',(req,res)=>{
     db.collection('list').find().toArray((err,result)=>{
@@ -44,16 +60,7 @@ app.get('/list',(req,res)=>{
 //list wrt id
 app.get('/list/:id',(req,res)=>{
     let id = Number(req.params.id);
-    db.collection('list').find({product_Id:id}).toArray((err,result)=>{
-        if(err) throw err;
-        res.send(result)
-    })
-})
-
-//product wrt id
-app.get('/category/:id',(req,res) => {
-    let categoryId = Number(req.params.id);
-    db.collection('category').find({category_id:categoryId}).toArray((err,result) => {
+    db.collection('list').find({product_id:id}).toArray((err,result)=>{
         if(err) throw err;
         res.send(result)
     })
