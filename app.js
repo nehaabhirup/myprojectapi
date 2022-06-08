@@ -33,17 +33,10 @@ app.get('/category',(req,res)=>{
     })
 })
 
-//product wrt id
-app.get('/product/',(req,res) => {
-    let query = {};
-    let categoryId =  Number(req.query.category_id)
-    let productId =  Number(req.query.product_id)
-    if(categoryId){
-        query = {category_id:categoryId}
-    }else if(productId){
-        query = {product_id:productId}
-    }
-    db.collection('product').find(query).toArray((err,result) => {
+//with id
+app.get('/category/:id',(req,res) => {
+    let categoryId = Number(req.params.id);
+    db.collection('category').find({category_id:categoryId}).toArray((err,result)=>{
         if(err) throw err;
         res.send(result)
     })
