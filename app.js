@@ -58,11 +58,10 @@ app.get('/list/:id',(req,res)=>{
         res.send(result)
     })
 })
-
 //details of item selected
 app.get('/details/:id',(req,res)=>{
-    let listId = Number(req.params.id);
-    db.collection('list').find({list_id:listId}).toArray((err,result)=>{
+    let prodId = Number(req.params.id);
+    db.collection('list').find({prod_id:prodId}).toArray((err,result)=>{
         if(err) throw err;
         res.send(result)
     })
