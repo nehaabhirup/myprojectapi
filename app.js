@@ -66,7 +66,17 @@ app.get('/details/:id',(req,res)=>{
         res.send(result)
     })
 })
-
+app.get('/viewDetails',(req,res) => {
+    let prodId = Number(req.query.prod_id);
+    let query = {};
+    if(prodId){
+        query = {prod_id:prodId}
+    }
+    db.collection('list').find(query).toArray((err,result) => {
+        if(err) throw err;
+        res.send(result)
+    })
+})
 // details of items on basis of id
 app.post('/listItem',(req,res) => {
     console.log(req.body);
