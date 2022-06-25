@@ -81,7 +81,7 @@ app.get('/viewDetails',(req,res) => {
 app.post('/listItem',(req,res) => {
     console.log(req.body);
     if(Array.isArray(req.body)){
-        db.collection('list').find({list_id:{$in:req.body}}).toArray((err,result) => {
+        db.collection('list').find({product_id:{$in:req.body}}).toArray((err,result) => {
             if(err) throw err;
             res.send(result)
         })
@@ -89,7 +89,17 @@ app.post('/listItem',(req,res) => {
         res.send('Invalid Input')
     }
 })
-
+app.post('/productItem',(req,res) => {
+    console.log(req.body);
+    if(Array.isArray(req.body)){
+        db.collection('items').find({list_Id:{$in:req.body}}).toArray((err,result) => {
+            if(err) throw err;
+            res.send(result)
+        })
+    }else{
+        res.send('Invalid Input')
+    }
+})
 //place order
 app.post('/placeOrder',(req,res) => {
     db.collection('orders').insertOne(req.body,(err,result) => {
