@@ -51,9 +51,9 @@ app.get('/list',(req,res)=>{
 })
 
 //list wrt id
-app.get('/list/:id',(req,res)=>{
-    let id = Number(req.params.id);
-    db.collection('list').find({product_id:id}).toArray((err,result)=>{
+app.get('/filters/:productId',(req,res)=>{
+    let productId = Number(req.params.productId);
+    db.collection('list').find({product_id:productId}).toArray((err,result)=>{
         if(err) throw err;
         res.send(result)
     })
@@ -130,15 +130,18 @@ app.delete('/deleteOrders',(req,res)=>{
 
 //Update orders
 app.put('/updateOrder/:id',(req,res) => {
-    let oId = mongo.ObjectId(req.params.id);
+    console.log(">>>id",req.params.id)
+    console.log(">>>id",req.body)
+    let oId = Number(req.params.id)
     db.collection('orders').updateOne(
-        {_id:oId},
+        {id:oId},
         {$set:{
-            "cost":req.body.cost,
-            "phone":req.body.phone
+            "status":req.body.status,
+            "bank_name":req.body.bank_name,
+            "date":req.body.date
         }},(err,result) => {
             if(err) throw err
-            res.send(`Cost Updated to ${req.body.cost}`)
+            res.send(`Status Updated to ${req.body.status}`)
         }
     )
 })
