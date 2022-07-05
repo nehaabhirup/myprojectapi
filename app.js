@@ -5,117 +5,83 @@ const MongoClient = mongo.MongoClient;
 const dotenv = require('dotenv');
 dotenv.config()
 let port = process.env.PORT || 8230;
-//const mongoUrl = "mongodb+srv://local:test12345@cluster0.f8vmc.mongodb.net/augintern?retryWrites=true&w=majority";
 const mongoUrl = process.env.mongoLiveUrl;
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const token = "8fbf8tyyt87378";
 
-// middleware
+//middleware
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(bodyParser.json())
 app.use(cors())
 
-
-app.get('/',(req,res) => {
-    res.send("Welcome to Express")
+app.get('/',(req,res)=>{
+    res.send("welcome to express")
+})
+// items
+app.get('/item',(req,res)=>{
+    db.collection('items').find().toArray((err,result)=>{
+        if(err) throw err;
+        res.send(result)
+    })
 })
 
-//location
-app.get('/location',(req,res) => {
-    if(req.query.token === token){
-        db.collection('location').find().toArray((err,result) => {
-            if(err) throw err;
-            res.send(result)
-        })
-    }else{
-        res.send('Unauthorise')
-    }
+//category
+app.get('/category',(req,res)=>{
+    db.collection('category').find().toArray((err,result)=>{
+        if(err) throw err;
+        res.send(result)
+    })
 })
 
-//restaurants
-app.get('/restaurants/',(req,res) => {
-    // let id = req.params.id;
-    // let id  = req.query.id
-    // console.log(">>>id",id)
+//with id
+app.get('/category/:id',(req,res) => {
+    let categoryId = Number(req.params.id);
+    db.collection('category').find({category_id:categoryId}).toArray((err,result)=>{
+        if(err) throw err;
+        res.send(result)
+    })
+})
+
+//list
+app.get('/list',(req,res)=>{
+    db.collection('list').find().toArray((err,result)=>{
+        if(err) throw err;
+        res.send(result)
+    })
+})
+
+//list wrt id
+app.get('/list/:id',(req,res)=>{
+    let id = Number(req.params.id);
+    db.collection('list').find({product_id:id}).toArray((err,result)=>{
+        if(err) throw err;
+        res.send(result)
+    })
+})
+//details of item selected
+app.get('/details/:id',(req,res)=>{
+    let prodId = Number(req.params.id);
+    db.collection('list').find({prod_id:prodId}).toArray((err,result)=>{
+        if(err) throw err;
+        res.send(result)
+    })
+})
+app.get('/viewDetails',(req,res) => {
+    let prodId = Number(req.query.prod_id);
     let query = {};
-    let stateId = Number(req.query.state_id)
-    let mealId = Number(req.query.meal_id)
-    if(stateId){
-        query = {state_id:stateId}
-    }else if(mealId){
-        query = {'mealTypes.mealtype_id':mealId}
+    if(prodId){
+        query = {prod_id:prodId}
     }
-
-    db.collection('restaurants').find(query).toArray((err,result) => {
+    db.collection('list').find(query).toArray((err,result) => {
         if(err) throw err;
         res.send(result)
     })
 })
-
-app.get('/filters/:mealId',(req,res) => {
-    let sort = {cost:1}
-    let mealId = Number(req.params.mealId)
-    let cuisineId = Number(req.query.cuisineId)
-    let lcost = Number(req.query.lcost)
-    let hcost = Number(req.query.hcost)
-
-    let query = {}
-    if(req.query.sort){
-        sort={cost:Number(req.query.sort)}
-    }
-    if(cuisineId){
-        query = {
-            "mealTypes.mealtype_id":mealId,
-            "cuisines.cuisine_id":cuisineId
-        }
-    }else if(lcost && hcost){
-        query = {
-            "mealTypes.mealtype_id":mealId,
-            $and:[{cost:{$gt:lcost,$lt:hcost}}]
-        }
-    }
-    else{
-        query = {
-            "mealTypes.mealtype_id":mealId
-        }
-    }
-
-    db.collection('restaurants').find(query).sort(sort).toArray((err,result) => {
-        if(err) throw err;
-        res.send(result)
-    })
-})
-
-//restaurantDetails
-app.get('/details/:id',(req,res) => {
-    //let restId = Number(req.params.id);
-    let restId = mongo.ObjectId(req.params.id)
-    db.collection('restaurants').find({_id:restId}).toArray((err,result) => {
-        if(err) throw err;
-        res.send(result)
-    })
-})
-
-
-//menu
-app.get('/menu',(req,res) => {
-    let query = {}
-    let restId = Number(req.query.restId)
-    if(restId){
-        query = {restaurant_id:restId}
-    }
-    db.collection('menu').find(query).toArray((err,result) => {
-        if(err) throw err;
-        res.send(result)
-    })
-})
-
-// menu on basis of id
-app.post('/menuItem',(req,res) => {
+// details of items on basis of id
+app.post('/listItem',(req,res) => {
     console.log(req.body);
     if(Array.isArray(req.body)){
-        db.collection('menu').find({menu_id:{$in:req.body}}).toArray((err,result) => {
+        db.collection('list').find({prod_id:{$in:req.body}}).toArray((err,result) => {
             if(err) throw err;
             res.send(result)
         })
@@ -123,15 +89,24 @@ app.post('/menuItem',(req,res) => {
         res.send('Invalid Input')
     }
 })
-
-// place Order
+app.post('/productItem',(req,res) => {
+    console.log(req.body);
+    if(Array.isArray(req.body)){
+        db.collection('items').find({list_Id:{$in:req.body}}).toArray((err,result) => {
+            if(err) throw err;
+            res.send(result)
+        })
+    }else{
+        res.send('Invalid Input')
+    }
+})
+//place order
 app.post('/placeOrder',(req,res) => {
-    db.collection('orders').insert(req.body,(err,result) => {
+    db.collection('orders').insertOne(req.body,(err,result) => {
         if(err) throw err;
         res.send('Order Placed')
     })
 })
-
 
 // View Order
 app.get('/viewOrder',(req,res) => {
@@ -153,30 +128,26 @@ app.delete('/deleteOrders',(req,res)=>{
     })
 })
 
-
-//update orders
+//Update orders
 app.put('/updateOrder/:id',(req,res) => {
-    console.log(">>>id",req.params.id)
-    console.log(">>>id",req.body)
-    let oId = Number(req.params.id)
+    let oId = mongo.ObjectId(req.params.id);
     db.collection('orders').updateOne(
-        {id:oId},
+        {_id:oId},
         {$set:{
-            "status":req.body.status,
-            "bank_name":req.body.bank_name,
-            "date":req.body.date
+            "cost":req.body.cost,
+            "phone":req.body.phone
         }},(err,result) => {
             if(err) throw err
-            res.send(`Status Updated to ${req.body.status}`)
+            res.send(`Cost Updated to ${req.body.cost}`)
         }
     )
 })
 
-// Connection with db
-MongoClient.connect(mongoUrl, (err,client) => {
+//Connection with mongodb
+MongoClient.connect(mongoUrl, (err,client) =>{
     if(err) console.log(`Error while connecting`);
-    db = client.db('augintern');
-    app.listen(port,() => {
+    db = client.db('second_project');
+    app.listen(port,()=>{
         console.log(`Server is running on port ${port}`)
     })
 })
