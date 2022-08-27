@@ -51,11 +51,11 @@ app.get('/list',(req,res)=>{
 })
 
 //list wrt id
-app.get('/filters/:productId',(req,res)=>{
+app.get('/filters/',(req,res)=>{
     let query = {};
-    let productId = Number(req.params.productId);
+    let productId = Number(req.query.product_id);
     if(productId){
-        query = {product_id:productId};
+        query = {product_id:productId}
     }
     db.collection('list').find(query).toArray((err,result)=>{
         if(err) throw err;
